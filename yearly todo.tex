@@ -1,0 +1,152 @@
+%%% Tue 25 May 2021 05:22:50 AM +0430
+\documentclass{article}
+\usepackage[margin=0pt, a5paper]{geometry}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage{advdate}
+\usepackage{xepersian}
+
+\ExplSyntaxOn
+\prg_new_conditional:Npnn \is_leapyear:n #1 { p, T, F, TF }
+  {
+    \int_compare:nNnTF { \int_mod:nn {#1} { 4 } } = { 0 }
+      {
+        \int_compare:nNnTF { \int_mod:nn {#1} { 100 } } = { 0 }
+          {
+            \int_compare:nNnTF { \int_mod:nn {#1} { 400 } } = { 0 }
+              { \prg_return_true: }
+              { \prg_return_false: }
+          }
+          { \prg_return_true: }
+      }
+      { \prg_return_false: }
+}
+
+\newcommand{\isLeapYear}[1]
+  {
+    \bool_if:nTF { \is_leapyear_p:n {#1} } {leap~year} {normal~year}
+  }
+\ExplSyntaxOff
+
+\makeatletter
+\renewcommand\AdvanceDate[1][\@ne]{\global\advance\day#1 \FixDate}
+\def\N@xtD@y{%
+  \ifnum\day>366
+    \ifnum\month>2
+      \global\advance\year\@ne \is@LeapYear \global\advance\day-\r@k
+    \else
+      \global\advance\day-\r@k \global\advance\year\@ne \is@LeapYear
+    \fi
+  \else
+    \global\advance\day-\M@s \global\advance\month\@ne \FixMonth
+  \fi}
+\makeatother
+\settextfont{XB Shafigh}
+\ExplSyntaxOn \cs_set_eq:NN \etex_iffontchar:D \tex_iffontchar:D \ExplSyntaxOff
+\setdigitfont{Yas}
+\setlatintextfont{Linux Libertine}
+
+\newif\ifoddpage \oddpagetrue
+
+\usetikzlibrary{calc}
+\def\dom#1{\ifcase#1 Sat\or Sun\or Mon\or Tue\or Wed\or Thu\or Fri\or Sat\fi}
+\newcount\monthname \monthname=1
+\def\mn{\ifcase\monthname \or فروردین\or اردیبهشت\or خرداد\or تیر\or مرداد\or شهریور\or مهر\or آبان\or‌ آذر\or دی\or بهمن\or اسفند\fi}
+\def\mnp{\ifcase\monthname \or March--April\or April--May\or May--June\or June--July\or July--August\or August--September\or September--October\or October--November\or‌ November--December\or December--January\or January--Feburary\or Feburary--March\fi}
+\def\emn{\ifcase\month \or Jan\or Feb\or Mar\or Apr\or May\or Jun\or Jul\or Aug\or‌ Sep\or Oct\or Nov\or Dec\else Jan\fi}
+
+%% Courtesy to https://tex.stackexchange.com/questions/34424/how-do-i-calculate-n-modulo-3-in-latex
+\newcount\tmpcnta
+\def\modulo#1{\tmpcnta=#1
+        \divide\tmpcnta by 7
+        \multiply\tmpcnta by 7
+        \multiply\tmpcnta by -1
+        \advance\tmpcnta by #1\relax
+        #1=\tmpcnta}
+
+%0= Sat,  1=Sun, 2=Mon 3=Tue, 4=Wed, 5=Thu 6=Fri
+\newcount\nody %Name of first day of year
+
+\makeatletter
+\def\mymonth#1#2#3{% index the starting day of a month
+\newif\ifsixteen \sixteentrue
+\def\thisyear{#1}
+\nody=#2 % sunday for 1400
+\def\getdateitems##1/##2/##3{%
+\ThisDay{\numexpr ##1-1\relax}
+\ThisMonth{##2}
+\ThisYear{##3}}
+\count2=80 % the first day of Jalali calendar is the 80th of the Gregory calendar
+\def\edy{\the\count2\global\advance\count2 by 1\relax\if\isLeapYear{\ThisYear}\ifnum\count2>366\global\count2=1\fi\else\ifnum\count2>365\global\count2=1\fi\fi}
+\expandafter\getdateitems#3
+\foreach \dayofyear in {1, 32, 63, 94, 125, 156, 187, 217, 247, 277, 307, 337} {
+    \foreach \x in {1,2}{%
+        \ifoddpage%
+            \global\count0=1%
+            \ifnum\dayofyear<186 %\global\advance\nody by 1\AdvanceDate\relax
+                \sixteentrue
+            \else
+                \sixteenfalse
+            \fi%
+        \else%
+            \global\count0=\ifnum\dayofyear>186 16\else 17\fi
+            \sixteenfalse
+        \fi%
+        \ifsixteen
+            \def\xrange{7.2,7.6,8,8.4,8.8,9.2,9.6,10,10.4,10.8,11.2,11.6,12,12.4,12.8,13.2,13.6,14,14.4,14.8}
+            \def\xrangeR{14.6,14.2,13.8,13.4,13,12.6,12.2,11.8,11.4,11,10.6,10.2,9.8,9.4,9,8.6} %
+            \def\ntep{8.2/next week, 7.8/task|event, 7.4/purchase}
+            \def\tshift{-0.4}
+            \def\mydraw{\draw (8.4, 18.5) -- (14.8, 18.5);}
+        \else
+            \def\xrange{7.6,8,8.4,8.8,9.2,9.6,10,10.4,10.8,11.2,11.6,12,12.4,12.8,13.2,13.6,14,14.4,14.8}
+            \def\xrangeR{14.6,14.2,13.8,13.4,13,12.6,12.2,11.8,11.4,11,10.6,10.2,9.8,9.4,9} %
+            \def\ntep{8.6/next week, 8.2/task|event, 7.8/purchase}
+            \def\tshift{0}
+            \def\mydraw{\draw (8.8, 18.5) -- (14.8, 18.5);}
+        \fi
+        \ifnum\dayofyear>336 \ifnum\x=2
+        \ifXePersian@leap%
+        \else  
+            \def\xrange{8,8.4,8.8,9.2,9.6,10,10.4,10.8,11.2,11.6,12,12.4,12.8,13.2,13.6,14,14.4,14.8}
+            \def\xrangeR{14.6,14.2,13.8,13.4,13,12.6,12.2,11.8,11.4,11,10.6,10.2,9.8,9.4} %
+            \def\ntep{9/next week, 8.6/task|event, 8.2/purchase}
+            \def\tshift{0.4}
+            \def\mydraw{\draw (9.2, 18.5) -- (14.8, 18.5);}
+        \fi\fi\fi
+        \count1=\dayofyear%
+        \global\advance\count1 by \count0\relax\global\advance\count1 by -1\relax%
+        \def\sc{\the\count0\global\advance\count0 by 1\relax}
+        \def\dy{\the\count1\global\advance\count1 by 1\relax} % number of the day in the whole year
+        \def\dm{\ifnum\nody>7\modulo{\nody}\fi\dom{\nody}\global\advance\nody by 1\relax}
+        \begin{tikzpicture}%[xshift=-1cm, scale=1.3]
+            \foreach \y in {0,.7,...,18.7,20.98}
+                {\draw (0, \y) -- (14.8, \y);}
+            \mydraw%\draw (8.8, 18.5) -- (14.8, 18.5);
+            \foreach \x in \xrange
+                {\draw[ultra thin] (\x, 0) -- (\x, 20.97);}
+            \foreach \x in \xrangeR{% {14.6,14.2,...,8.6}{
+                \node at (\x, 18.35) {\tiny\sc};
+                \node [rotate=90, anchor=west] at (\x, 18.5) {\tiny\dy};
+                \node [rotate=90, anchor=east] at (\x, 19.7) {\small\scshape\ttfamily\dm};
+                \node [xshift=-.5mm]at (\x, 19.75) {{\tiny\scshape\ttfamily\AdvanceDate\the\day}};
+                \node [rotate=90, anchor=east]at (\x, 20.3) {{\tiny\ttfamily\emn}};
+                \node [rotate=90, anchor=west]at (\x, 20.2) {{\tiny\ttfamily\edy}};
+                \node [anchor=east] at ($(7.5, 20.2)+(\tshift,0)$) {\hboxR{\mn\space \thisyear}};
+                \node [anchor=west] at (.35, 20.2) {\lr{\scshape\mnp}};
+            }
+            \foreach \x/\y in \ntep%{8.6/next week, 8.2/task|event, 7.8/purchase}
+                \node at (\x, 19.5) [rotate=90] {\ttfamily \small\y};
+        \end{tikzpicture}%
+        \ifoddpage\global\oddpagefalse\else\global\oddpagetrue\fi
+    }\global\advance\monthname by 1\relax}%
+}
+\makeatother
+
+\parindent=0pt
+\pagestyle{empty}
+
+\begin{document}
+    %\mymonth{1400}{1}{21/3/2021} % first day of 1400 is Sunday
+    \mymonth{1401}{2}{21/3/2022} % first day of 1401 is Monday
+\end{document}
