@@ -4,7 +4,12 @@
 \usepackage{tikz}
 \usetikzlibrary{calc}
 \usepackage{advdate}
+\usepackage{datenumber}
 \usepackage{xepersian}
+\settextfont{XB Shafigh}
+\ExplSyntaxOn \cs_set_eq:NN \etex_iffontchar:D \tex_iffontchar:D \ExplSyntaxOff
+\setdigitfont{Yas}
+\setlatintextfont{Linux Libertine}
 
 \ExplSyntaxOn
 \prg_new_conditional:Npnn \is_leapyear:n #1 { p, T, F, TF }
@@ -41,19 +46,15 @@
     \global\advance\day-\M@s \global\advance\month\@ne \FixMonth
   \fi}
 \makeatother
-\settextfont{XB Shafigh}
-\ExplSyntaxOn \cs_set_eq:NN \etex_iffontchar:D \tex_iffontchar:D \ExplSyntaxOff
-\setdigitfont{Yas}
-\setlatintextfont{Linux Libertine}
 
-\newif\ifoddpage \oddpagetrue
+\newif\ifoddpage
 
 \usetikzlibrary{calc}
 \def\dom#1{\ifcase#1 Sat\or Sun\or Mon\or Tue\or Wed\or Thu\or Fri\or Sat\fi}
-\newcount\monthname \monthname=1
-\def\mn{\ifcase\monthname \or فروردین\or اردیبهشت\or خرداد\or تیر\or مرداد\or شهریور\or مهر\or آبان\or‌ آذر\or دی\or بهمن\or اسفند\fi}
-\def\mnp{\ifcase\monthname \or March--April\or April--May\or May--June\or June--July\or July--August\or August--September\or September--October\or October--November\or‌ November--December\or December--January\or January--Feburary\or Feburary--March\fi}
-\def\emn{\ifcase\month \or Jan\or Feb\or Mar\or Apr\or May\or Jun\or Jul\or Aug\or‌ Sep\or Oct\or Nov\or Dec\else Jan\fi}
+\newcount\monthname
+\def\mn{\ifcase\monthname \or فروردین\or اردیبهشت\or خرداد\or تیر\or مرداد\or شهریور\or مهر\or آبان\or آذر\or دی\or بهمن\or اسفند\fi}
+\def\mnp{\ifcase\monthname \or March--April\or April--May\or May--June\or June--July\or July--August\or August--September\or September--October\or October--November\or November--December\or December--January\or January--Feburary\or Feburary--March\fi}
+\def\emn{\ifcase\month \or Jan\or Feb\or Mar\or Apr\or May\or Jun\or Jul\or Aug\or Sep\or Oct\or Nov\or Dec\else Jan\fi}
 
 %% Courtesy to https://tex.stackexchange.com/questions/34424/how-do-i-calculate-n-modulo-3-in-latex
 \newcount\tmpcnta
@@ -66,19 +67,27 @@
 
 %0= Sat,  1=Sun, 2=Mon 3=Tue, 4=Wed, 5=Thu 6=Fri
 \newcount\nody %Name of first day of year
+\newif\ifsixteen
 
 \makeatletter
-\def\mymonth#1#2#3{% index the starting day of a month
-\newif\ifsixteen \sixteentrue
+\def\yearlytodo#1{% index the starting day of a month
+\monthname=1%
+\sixteentrue%
+\oddpagetrue%
 \def\thisyear{#1}
-\nody=#2 % sunday for 1400
-\def\getdateitems##1/##2/##3{%
-\ThisDay{\numexpr ##1-1\relax}
-\ThisMonth{##2}
-\ThisYear{##3}}
+% \nody=#2 % sunday for 1400
+% \def\getdateitems##1/##2/##3{%
+% \ThisDay{\numexpr ##1-1\relax}
+% \ThisMonth{##2}
+% \ThisYear{##3}}
+\ThisYear{\numexpr #1+621\relax}
+\ThisMonth{3}
+\ThisDay{\if\isLeapYear{\the\year}19\else20\fi}
+\setdate{\the\year}{\the\month}{\the\day} % to set the correct number for datedayname counter.
+\nody=\ifcase\thedatedayname\or2\or3\or4\or5\or6\or0\or1\fi
 \count2=80 % the first day of Jalali calendar is the 80th of the Gregory calendar
 \def\edy{\the\count2\global\advance\count2 by 1\relax\if\isLeapYear{\ThisYear}\ifnum\count2>366\global\count2=1\fi\else\ifnum\count2>365\global\count2=1\fi\fi}
-\expandafter\getdateitems#3
+% \expandafter\getdateitems#3
 \foreach \dayofyear in {1, 32, 63, 94, 125, 156, 187, 217, 247, 277, 307, 337} {
     \foreach \x in {1,2}{%
         \ifoddpage%
@@ -107,7 +116,7 @@
         \fi
         \ifnum\dayofyear>336 \ifnum\x=2
         \ifXePersian@leap%
-        \else  
+        \else
             \def\xrange{8,8.4,8.8,9.2,9.6,10,10.4,10.8,11.2,11.6,12,12.4,12.8,13.2,13.6,14,14.4,14.8}
             \def\xrangeR{14.6,14.2,13.8,13.4,13,12.6,12.2,11.8,11.4,11,10.6,10.2,9.8,9.4} %
             \def\ntep{9/next week, 8.6/task|event, 8.2/purchase}
@@ -128,12 +137,13 @@
             \foreach \x in \xrangeR{% {14.6,14.2,...,8.6}{
                 \node at (\x, 18.35) {\tiny\sc};
                 \node [rotate=90, anchor=west] at (\x, 18.5) {\tiny\dy};
-                \node [rotate=90, anchor=east] at (\x, 19.7) {\small\scshape\ttfamily\dm};
-                \node [xshift=-.5mm]at (\x, 19.75) {{\tiny\scshape\ttfamily\AdvanceDate\the\day}};
+                \node [rotate=90, anchor=east] at (\x, 19.7) {\small\ttfamily\dm};
+                \node [xshift=-.5mm]at (\x, 19.75) {{\tiny\ttfamily\AdvanceDate\the\day}};
                 \node [rotate=90, anchor=east]at (\x, 20.3) {{\tiny\ttfamily\emn}};
                 \node [rotate=90, anchor=west]at (\x, 20.2) {{\tiny\ttfamily\edy}};
                 \node [anchor=east] at ($(7.5, 20.2)+(\tshift,0)$) {\hboxR{\mn\space \thisyear}};
-                \node [anchor=west] at (.35, 20.2) {\lr{\scshape\mnp}};
+                \node [anchor=west] at (.35, 20.2) {\lr{\scshape\mnp{}
+                \ifnum\monthname>9 \the\numexpr\year+1\relax\else\the\year\fi}};
             }
             \foreach \x/\y in \ntep%{8.6/next week, 8.2/task|event, 7.8/purchase}
                 \node at (\x, 19.5) [rotate=90] {\ttfamily \small\y};
@@ -147,6 +157,7 @@
 \pagestyle{empty}
 
 \begin{document}
-    %\mymonth{1400}{1}{21/3/2021} % first day of 1400 is Sunday
-    \mymonth{1401}{2}{21/3/2022} % first day of 1401 is Monday
+    % \yearlytodo{1400}% first day of 1400 is Sunday
+    \yearlytodo{1401}% first day of 1401 is Monday
+    \yearlytodo{1402}% first day of 1402 is Tuesday
 \end{document}
