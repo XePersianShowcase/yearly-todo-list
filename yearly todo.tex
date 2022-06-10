@@ -107,7 +107,7 @@
 \ThisYear{\numexpr #1+621\relax}
 \ThisMonth{3}
 \ThisDay{\isLeapYear{\the\year}19\else20\fi}
-\setdate{\the\year}{\the\month}{\the\day} % to set the correct number for datedayname counter.
+\setdate{\the\year}{\the\month}{\numexpr\day+1\relax} % to set the correct number for datedayname counter.
 \nody=\ifcase\thedatedayname\or2\or3\or4\or5\or6\or0\or1\fi
 \count2=\isLeapYear{\numexpr\year-1\relax}81\else80\fi % the first day of Jalali calendar is the 80th/81st of the Gregory calendar
 \def\edy{\the\count2\global\advance\count2 by 1\relax%
