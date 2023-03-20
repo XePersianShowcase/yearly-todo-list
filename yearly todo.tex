@@ -37,30 +37,6 @@
 
 \makeatletter
 \renewcommand\AdvanceDate[1][\@ne]{\global\advance\day#1 \FixDate}
-\renewcommand\is@LeapYear[1][\year]{\r@k#1\un@r\r@k
-  \global\divide\r@k4\multiply\r@k4\advance\r@k-\un@r
-  \ifnum\r@k=0%
-      \divide\un@r100\r@k\un@r\multiply\un@r100\advance\un@r-#1%
-    \ifnum\un@r=0%
-      \global\un@r\r@k \divide\un@r4\multiply\un@r4\advance\un@r-\r@k
-      \global\un@r\ifnum\un@r=0 29\else 28\fi
-    \else
-      \global\un@r 29%
-    \fi
-  \else
-    \un@r 28%
-  \fi
-  \r@k 337\advance\r@k\un@r}
-\def\N@xtD@y{%
-  \ifnum\day>366
-    \ifnum\month>2
-      \global\advance\year\@ne \is@LeapYear \global\advance\day-\r@k
-    \else
-      \global\advance\day-\r@k \global\advance\year\@ne \is@LeapYear
-    \fi
-  \else
-    \global\advance\day-\M@s \global\advance\month\@ne \FixMonth
-  \fi}
 \makeatother
 
 \newif\ifoddpage
@@ -70,7 +46,7 @@
 \newcount\monthname
 \def\mn{\ifcase\monthname \or فروردین\or اردیبهشت\or خرداد\or تیر\or مرداد\or شهریور\or مهر\or آبان\or آذر\or دی\or بهمن\or اسفند\fi}
 \def\mnp{\ifcase\monthname \or March--April\or April--May\or May--June\or June--July\or July--August\or August--September\or September--October\or October--November\or November--December\or December--January\or January--Feburary\or Feburary--March\fi}
-\def\emn{\ifcase\month \or Jan\or Feb\or Mar\or Apr\or May\or Jun\or Jul\or Aug\or Sep\or Oct\or Nov\or Dec\else Jan\fi}
+\def\emn{\ifcase\count3 \or Jan\or Feb\or Mar\or Apr\or May\or Jun\or Jul\or Aug\or Sep\or Oct\or Nov\or Dec\else Jan\fi}
 
 \makeatletter
 \newif\ifPersianLeap \PersianLeapfalse
@@ -163,7 +139,7 @@
                 \node at (\x, 18.35) {\tiny\sc};
                 \node [rotate=90, anchor=west] at (\x, 18.5) {\tiny\dy};
                 \node [rotate=90, anchor=east] at (\x, 19.7) {\small\ttfamily\dm};
-                \node at (\x, 19.75) {{\tiny\ttfamily\AdvanceDate[1]\the\day}};
+                \node at (\x, 19.75) {{\tiny\ttfamily\AdvanceDate[1]\the\day\global\count3=\month}};
                 \node [rotate=90, anchor=east]at (\x, 20.3) {\tiny\ttfamily\emn};
                 \node [rotate=90, anchor=west]at (\x, 20.2) {\tiny\ttfamily\edy};
                 \node [anchor=east] at ($(7.5, 20.2)+(\tshift,0)$) {\hboxR{\mn\space \thisyear}};
@@ -183,8 +159,8 @@
 
 \begin{document}
     % \yearlytodo{1400}% first day of 1400 is Sunday
-    \yearlytodo{1401}% first day of 1401 is Monday
-    %\yearlytodo{1402}% first day of 1402 is Tuesday
-    %\yearlytodo{1403}% first day of 1401 is Wednesday
+    % \yearlytodo{1401}% first day of 1401 is Monday
+    \yearlytodo{1402}% first day of 1402 is Tuesday
+%    \yearlytodo{1403}% first day of 1401 is Wednesday
     % \yearlytodo{1404}% first day of 1402 is Friday
 \end{document}
