@@ -85,10 +85,14 @@
 \oddpagetrue%
 \ThisYear{\numexpr #1+621\relax}
 \ThisMonth{3}
-\ThisDay{\isLeapYear{\the\year}19\else20\fi}
+\newif\ifEitherLeap
+\EitherLeapfalse
+\isLeapYear{\ThisYear}\EitherLeaptrue\else\EitherLeapfalse\fi
+\ifPersianLeap\EitherLeaptrue\fi
+\ThisDay{\ifEitherLeap 19\else20\fi}
 \setdate{\the\year}{\the\month}{\numexpr\day+1\relax} % to set the correct number for datedayname counter.
 \nody=\ifcase\thedatedayname\or2\or3\or4\or5\or6\or0\or1\fi
-\count2=\isLeapYear{\numexpr\year-1\relax}81\else80\fi % the first day of Jalali calendar is the 80th/81st of the Gregory calendar
+\count2=\ifEitherLeap 81\else80\fi % the first day of Jalali calendar is the 80th/81st of the Gregory calendar
 \def\edy{\the\count2\global\advance\count2 by 1\relax%
 \isLeapYear{\the\year}\ifnum\count2>366\global\count2=1\fi\else\ifnum\count2>365\global\count2=1\fi\fi}
 % \expandafter\getdateitems#3
@@ -163,7 +167,9 @@
 \begin{document}
     % \yearlytodo{1400}% first day of 1400 is Sunday
     % \yearlytodo{1401}% first day of 1401 is Monday
-%    \yearlytodo{1402}% first day of 1402 is Tuesday
-%    \yearlytodo{1403}% first day of 1403 is Wednesday
-     \yearlytodo{1404}% first day of 1404 is Friday
+    % \yearlytodo{1402}% first day of 1402 is Tuesday
+    % \yearlytodo{1403}% first day of 1403 is Wednesday
+    % \yearlytodo{1404}% first day of 1404 is Friday
+    % \yearlytodo{1405}% first day of 1404 is Saturday
+    \yearlytodo{1404}
 \end{document}
